@@ -1,0 +1,14 @@
+package main;
+
+import java.sql.Connection;
+import java.util.Collections;
+
+import Repository.EntityManagerFactoryImpl;
+import dto.CustomerEntity;
+
+public class main {
+	public static void main(String[] args) {
+		CustomerEntity customerEntity = new CustomerEntity("Tài Tài Tài"); 
+		
+	}
+}

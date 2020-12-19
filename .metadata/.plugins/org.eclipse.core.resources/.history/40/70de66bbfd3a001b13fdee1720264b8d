@@ -1,0 +1,37 @@
+package dto;
+
+import annotation.Column;
+import annotation.Entity;
+import annotation.Table;
+
+@Entity
+@Table(name = "customer")
+public class CustomerEntity {
+	@Column(name = "customer_id")
+	private Integer id;
+	
+	@Column(name = "customer_name")
+	private String customer_name;
+
+	public CustomerEntity(String userName) {
+		super();
+		this.userName = userName;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+}

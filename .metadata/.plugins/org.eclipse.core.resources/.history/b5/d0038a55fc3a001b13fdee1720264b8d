@@ -1,0 +1,14 @@
+package main;
+
+import Repository.IJpaRepository;
+import Repository.JpaRepositoryImpl;
+import dto.CustomerEntity;
+
+public class main {
+	public static void main(String[] args) {
+		CustomerEntity customerEntity = new CustomerEntity("Tài Tài Tài");
+		IJpaRepository jpaRepository = new JpaRepositoryImpl();
+		
+		
+	}
+}

@@ -1,0 +1,20 @@
+package main;
+
+import java.sql.Connection;
+import java.util.Collections;
+
+import Repository.EntityManagerFactoryImpl;
+
+public class main {
+	public static void main(String[] args) {
+		Connection connection = null;
+		connection = EntityManagerFactoryImpl.getConnection();
+		
+		if(connection != null) {
+			System.out.println("Ket noi thanh cong");
+		} else {
+			System.out.println("Ket noi that bai");
+		}
+		
+	}
+}

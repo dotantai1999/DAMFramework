@@ -1,0 +1,10 @@
+package dto;
+
+import annotation.Entity;
+import annotation.Table;
+
+@Entity
+@Table(name = "user")
+public class CustomerEntity {
+	
+}

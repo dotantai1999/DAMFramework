@@ -1,0 +1,24 @@
+package dto;
+
+import annotation.Column;
+import annotation.Entity;
+import annotation.Table;
+
+@Entity
+@Table(name = "product")
+public class ProductEntity {
+	@Column(name = "product_id")
+	private Integer product_id;
+	
+	@Column(name = "product_name")
+	private string product_name;
+	
+	@Column(name = "product_price")
+	private String product_name;
+	
+	
+	
+	
+	
+	
+}

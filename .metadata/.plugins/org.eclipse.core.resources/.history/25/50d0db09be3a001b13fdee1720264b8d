@@ -1,0 +1,5 @@
+package com.designpattern.Repository;
+
+public interface IEntityManager {
+
+}

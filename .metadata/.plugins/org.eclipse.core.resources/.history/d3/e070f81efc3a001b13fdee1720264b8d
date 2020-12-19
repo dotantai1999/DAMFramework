@@ -1,0 +1,16 @@
+package main;
+
+import java.sql.Connection;
+import java.util.Collections;
+
+import Repository.EntityManagerFactoryImpl;
+
+public class main {
+	public static void main(String[] args) {
+		Connection connection = null;
+		connection = EntityManagerFactoryImpl.getConnection();
+		
+		CustomerEntity customerEntity = new CustomerEntity("Tài Tài Tài"); 
+		
+	}
+}
