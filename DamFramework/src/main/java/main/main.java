@@ -20,7 +20,8 @@ public class main {
 
 
 		ISession session = new SessionImpl();
+
+		userEntity2.setUserId(32);
 		session.update(userEntity2);
-//		userEntity.setUserId(30);
 	}
 }

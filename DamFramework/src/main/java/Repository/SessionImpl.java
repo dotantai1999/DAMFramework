@@ -135,7 +135,7 @@ public class SessionImpl<T> implements ISession<T>{
         return null;
     }
     @Override
-    public void update(Object object) {
+    public Object update(Object object) {
         String sql = "";
         try {
             sql = createSqlUpdate(object);
@@ -144,6 +144,78 @@ public class SessionImpl<T> implements ISession<T>{
         }
 
         System.out.println("update sql: " + sql);
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Object id = null;
+
+            // connect with DB
+            connection = DBConnectionImpl.getConnection();
+
+            if (connection != null) {
+                System.out.println("Ket noi thanh cong");
+            }
+
+            // dont commit when occur error and callback (transaction)
+            connection.setAutoCommit(false);
+
+            // create statement
+            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            /* setParameter(statement, parameters); */
+
+            // set param
+            Class aClass = object.getClass();
+            Field[] fields = aClass.getDeclaredFields();
+            fields[0].setAccessible(true);
+            statement.setObject(fields.length, fields[0].get(object));
+            for (int i = 1; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                statement.setObject(i, field.get(object));
+            }
+
+            // excute query
+            statement.executeUpdate();
+
+            // get Id from result in resultSet
+            resultSet = statement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                id = resultSet.getObject(1);
+            }
+
+            connection.commit();
+            return id;
+
+        } catch (SQLException | IllegalAccessException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    DBConnectionImpl.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+        return null;
     }
     @Override
     public void delete(Object object) {
