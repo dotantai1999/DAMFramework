@@ -14,16 +14,14 @@ public class main {
 
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
-		UserEntity userEntity = new UserEntity("LA", "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
+		UserEntity userEntity = new UserEntity( null, "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
 		UserEntity userEntity2 = new UserEntity("LA2", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
 		System.out.println("running . . .");
 
 
-
-
-
 		ISession session = new SessionImpl();
-		session.insertOneToOne(userEntity);
-		session.insertOneToOne(userEntity2);
+//		userEntity.setUserId(30);
+		session.delete(userEntity);
+//		session.insertOneToOne(userEntity);
 	}
 }

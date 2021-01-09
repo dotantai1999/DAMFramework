@@ -143,7 +143,12 @@ public class SessionImpl<T> implements ISession<T> {
 
     @Override
     public void delete(Object object) {
-        String sql = createSqlDelete(object);
+        String sql = null;
+        try {
+            sql = createSqlDelete(object);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
         System.out.print(sql);
 
         Connection connection = null;
@@ -328,7 +333,7 @@ public class SessionImpl<T> implements ISession<T> {
 //	}
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private String createSqlDelete(Object object) {
+    private String createSqlDelete(Object object) throws IllegalAccessException {
         String tableName = "";
         Class zClass = object.getClass();
 
@@ -340,13 +345,17 @@ public class SessionImpl<T> implements ISession<T> {
         Field[] fields = zClass.getDeclaredFields();
 
         Column column = null;
+        String sql = "DELETE FROM " + tableName + " WHERE 1 = 1 ";
+
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class) && field.isAnnotationPresent(Id.class)) {
-                column = field.getAnnotation(Column.class);
+            field.setAccessible(true);
+            if (field.isAnnotationPresent(Column.class) && field.get(object) != null) {
+                sql += "AND " + field.getAnnotation(Column.class).name() + " = ? " ;
             }
         }
 
-        String sql = "DELETE FROM " + tableName + " WHERE " + column.name() + " = ?";
+        System.out.println("gen sql: " + sql);
+
         return sql;
     }
 }
