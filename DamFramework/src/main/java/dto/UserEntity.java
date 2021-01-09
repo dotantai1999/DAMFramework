@@ -27,6 +27,8 @@ public class UserEntity {
 	@Column(name = "address")
 	private AddressEntity address;
 
+	public UserEntity() {
+	}
 
 	public UserEntity(String userName, String password, String email, Date registeredDate, AddressEntity address) {
 		this.userName = userName;

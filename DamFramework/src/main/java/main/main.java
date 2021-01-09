@@ -20,8 +20,7 @@ public class main {
 
 
 		ISession session = new SessionImpl();
+		session.update(userEntity2);
 //		userEntity.setUserId(30);
-		session.delete(userEntity);
-//		session.insertOneToOne(userEntity);
 	}
 }

@@ -9,7 +9,7 @@ import java.sql.Statement;
 
 import annotation.*;
 
-public class SessionImpl<T> implements ISession<T> {
+public class SessionImpl<T> implements ISession<T>{
 
     public SessionImpl() {
 
@@ -59,7 +59,6 @@ public class SessionImpl<T> implements ISession<T> {
         String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
         return sql;
     }
-
     @Override
     public Object insert(Object object) {
         String sql = createSqlInsert(object);
@@ -135,12 +134,17 @@ public class SessionImpl<T> implements ISession<T> {
         }
         return null;
     }
-
     @Override
     public void update(Object object) {
+        String sql = "";
+        try {
+            sql = createSqlUpdate(object);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
+        System.out.println("update sql: " + sql);
     }
-
     @Override
     public void delete(Object object) {
         String sql = null;
@@ -171,13 +175,17 @@ public class SessionImpl<T> implements ISession<T> {
             // set param
             Class aClass = object.getClass();
             Field[] fields = aClass.getDeclaredFields();
+            int count = 1;
             for (int i = 0; i < fields.length; i++) {
-                if (fields[i].isAnnotationPresent(Column.class) && fields[i].isAnnotationPresent(Id.class)) {
+                fields[i].setAccessible(true);
+                if (fields[i].isAnnotationPresent(Column.class) && fields[i].get(object) != null) {
                     Field field = fields[i];
-                    field.setAccessible(true);
-                    statement.setObject(1, field.get(object));
+//                    field.setAccessible(true);
+                    statement.setObject(count++, field.get(object));
                 }
             }
+
+            System.out.println("statement: " + statement.toString());
 
             // excute query
             statement.executeUpdate();
@@ -210,7 +218,6 @@ public class SessionImpl<T> implements ISession<T> {
             }
         }
     }
-
     @Override
     public Object insertOneToOne(Object object) {
 //		String sql = createSqlInsertOneToOne(object);
@@ -333,7 +340,7 @@ public class SessionImpl<T> implements ISession<T> {
 //	}
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private String createSqlDelete(Object object) throws IllegalAccessException {
+    private static String createSqlDelete(Object object) throws IllegalAccessException {
         String tableName = "";
         Class zClass = object.getClass();
 
@@ -353,6 +360,47 @@ public class SessionImpl<T> implements ISession<T> {
                 sql += "AND " + field.getAnnotation(Column.class).name() + " = ? " ;
             }
         }
+
+        System.out.println("gen sql: " + sql);
+
+        return sql;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static String createSqlUpdate(Object object) throws IllegalAccessException {
+        String tableName = "";
+        Class zClass = object.getClass();
+
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = (Table) zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+
+        Field[] fields = zClass.getDeclaredFields();
+
+        Column column = null;
+        String sql = "UPDATE " + tableName + " SET ";
+
+        String idField = "";
+
+        int count = 1;
+        for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.isAnnotationPresent(Column.class)) {
+
+                if(field.isAnnotationPresent(Id.class)){
+                    idField = field.getAnnotation(Column.class).name();
+                    continue;
+                }
+
+                if(count++ == 1){
+                    sql += field.getAnnotation(Column.class).name() + " = ?" ;
+                }else{
+                    sql += ", " + field.getAnnotation(Column.class).name() + " = ?" ;
+                }
+            }
+        }
+        sql += " WHERE " + idField + " = ?";
 
         System.out.println("gen sql: " + sql);
 
