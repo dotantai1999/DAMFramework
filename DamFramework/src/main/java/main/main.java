@@ -1,21 +1,29 @@
 package main;
 
+import Repository.EntityManagerFactoryImpl;
 import Repository.IJpaRepository;
 import Repository.JpaRepositoryImpl;
+import dto.AddressEntity;
 import dto.CustomerEntity;
 import dto.ProductEntity;
+import dto.UserEntity;
+
+//import java.sql.Date;
+//import java.util.Date;
 
 public class main {
 	public static void main(String[] args) {
-		CustomerEntity customerEntity = new CustomerEntity("Tài Tài Tài");
-		System.out.println("dfsfsdsdfsfd");
-		ProductEntity productEntity = new ProductEntity("Tài", 3000);
-		productEntity.setProduct_id(10);
-		
-		
-		IJpaRepository jpaRepository = new JpaRepositoryImpl();
-		jpaRepository.delete(productEntity);
+		EntityManagerFactoryImpl efi = new EntityManagerFactoryImpl();
 
+		java.util.Date utilDate = new java.util.Date();
+		java.sql.Date now = new java.sql.Date(utilDate.getTime());
+		UserEntity userEntity = new UserEntity("SÆ¡n", "12345", "nguyenthaison@gmail.com", now, new AddressEntity("TP. HCM"));
+		System.out.println("dfsfsdsdfsfd");
+
+
+
+		IJpaRepository jpaRepository = new JpaRepositoryImpl();
+		jpaRepository.insertOneToOne(userEntity);
 
 	}
 }
