@@ -9,9 +9,9 @@ import java.sql.Statement;
 
 import annotation.*;
 
-public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
+public class SessionImpl<T> implements ISession<T> {
 
-    public JpaRepositoryImpl() {
+    public SessionImpl() {
 
     }
 
@@ -72,7 +72,7 @@ public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
             Object id = null;
 
             // connect with DB
-            connection = EntityManagerFactoryImpl.getConnection();
+            connection = DBConnectionImpl.getConnection();
 
             if (connection != null) {
                 System.out.println("Ket noi thanh cong");
@@ -119,7 +119,7 @@ public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
         } finally {
             try {
                 if (connection != null) {
-                    connection.close();
+                    DBConnectionImpl.close();
                 }
                 if (statement != null) {
                     statement.close();
@@ -154,7 +154,7 @@ public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
             Long id = null;
 
             // connect with DB
-            connection = EntityManagerFactoryImpl.getConnection();
+            connection = DBConnectionImpl.getConnection();
 
             // dont commit when occur error and callback (transaction)
             connection.setAutoCommit(false);
@@ -254,7 +254,7 @@ public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
             Long id = null;
 
             // connect with DB
-            connection = EntityManagerFactoryImpl.getConnection();
+            connection = DBConnectionImpl.getConnection();
 
             if (connection != null) {
                 System.out.println("Ket noi thanh cong");
@@ -305,7 +305,7 @@ public class JpaRepositoryImpl<T> implements IJpaRepository<T> {
         } finally {
             try {
                 if (connection != null) {
-                    connection.close();
+                    DBConnectionImpl.close();
                 }
                 if (statement != null) {
                     statement.close();

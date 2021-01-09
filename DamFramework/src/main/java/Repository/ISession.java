@@ -1,6 +1,6 @@
 package Repository;
 
-public interface IJpaRepository<T> {
+public interface ISession<T> {
 	Object insert(Object object);
 	void update(Object object);
 	void delete(Object object);

@@ -1,11 +1,9 @@
 package main;
 
-import Repository.EntityManagerFactoryImpl;
-import Repository.IJpaRepository;
-import Repository.JpaRepositoryImpl;
+import Repository.DBConnectionImpl;
+import Repository.ISession;
+import Repository.SessionImpl;
 import dto.AddressEntity;
-import dto.CustomerEntity;
-import dto.ProductEntity;
 import dto.UserEntity;
 
 //import java.sql.Date;
@@ -13,17 +11,19 @@ import dto.UserEntity;
 
 public class main {
 	public static void main(String[] args) {
-		EntityManagerFactoryImpl efi = new EntityManagerFactoryImpl();
 
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
-		UserEntity userEntity = new UserEntity("Sơn", "12345", "nguyenthaison@gmail.com", now, new AddressEntity("TP. HCM"));
-		System.out.println("dfsfsdsdfsfd");
+		UserEntity userEntity = new UserEntity("LA", "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
+		UserEntity userEntity2 = new UserEntity("LA2", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
+		System.out.println("running . . .");
 
 
 
-		IJpaRepository jpaRepository = new JpaRepositoryImpl();
-		jpaRepository.insertOneToOne(userEntity);
 
+
+		ISession session = new SessionImpl();
+		session.insertOneToOne(userEntity);
+		session.insertOneToOne(userEntity2);
 	}
 }
