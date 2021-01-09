@@ -411,6 +411,13 @@ public class SessionImpl<T> implements ISession<T>{
 //		return
 //	}
 
+    public Object get(Class zClass, Object id){
+
+        String sql = createSqlSelect(zClass);
+
+        return null;
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static String createSqlDelete(Object object) throws IllegalAccessException {
         String tableName = "";
@@ -475,6 +482,35 @@ public class SessionImpl<T> implements ISession<T>{
         sql += " WHERE " + idField + " = ?";
 
         System.out.println("gen sql: " + sql);
+
+        return sql;
+    }
+
+    private static String createSqlSelect(Class zClass) {
+        String sql = "SELECT * FROM ";
+        String tableName = "";
+        if(zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class)) {
+            Table tableClass = (Table) zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+
+        sql += tableName + " WHERE ";
+
+        String idField = "";
+
+        Field[] fields = zClass.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            if (field.isAnnotationPresent(Column.class)) {
+                if(field.isAnnotationPresent(Id.class)){
+                    idField = field.getAnnotation(Column.class).name();
+                    break;
+                }
+            }
+        }
+
+        sql += idField + " = ?";
+        System.out.println("select sql: " + sql);
 
         return sql;
     }

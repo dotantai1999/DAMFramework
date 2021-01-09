@@ -5,6 +5,7 @@ import Repository.ISession;
 import Repository.SessionImpl;
 import dto.AddressEntity;
 import dto.UserEntity;
+import dto.UserModel;
 
 //import java.sql.Date;
 //import java.util.Date;
@@ -21,7 +22,9 @@ public class main {
 
 		ISession session = new SessionImpl();
 
-		userEntity2.setUserId(32);
-		session.update(userEntity2);
+		session.get(UserModel.class, 32);
+
+//		userEntity2.setUserId(32);
+//		session.update(userEntity2);
 	}
 }
