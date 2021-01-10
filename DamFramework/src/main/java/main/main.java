@@ -22,7 +22,11 @@ public class main {
 
 		ISession session = new SessionImpl();
 
-		session.get(UserModel.class, 32);
+		UserModel obj = (UserModel) session.get(UserModel.class, 32);
+
+		System.out.println("returnnnn: " + obj.toString());
+
+
 
 //		userEntity2.setUserId(32);
 //		session.update(userEntity2);

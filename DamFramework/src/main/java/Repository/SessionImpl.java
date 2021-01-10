@@ -1,11 +1,7 @@
 package Repository;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import annotation.*;
 
@@ -412,10 +408,83 @@ public class SessionImpl<T> implements ISession<T>{
 //	}
 
     public Object get(Class zClass, Object id){
-
         String sql = createSqlSelect(zClass);
 
-        return null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        Object resObject = null;
+
+        try {
+            // return int
+            resObject = zClass.newInstance();
+
+            // connect with DB
+            connection = DBConnectionImpl.getConnection();
+
+            if (connection != null) {
+                System.out.println("Ket noi thanh cong");
+            }
+
+            // dont commit when occur error and callback (transaction)
+            connection.setAutoCommit(false);
+
+            // create statement
+            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            /* setParameter(statement, parameters); */
+
+
+            statement.setObject(1, id);
+
+            // excute query
+            resultSet = statement.executeQuery();
+
+            connection.commit();
+
+            // get resultSet metadata ---> get column name
+            ResultSetMetaData rsMetadata = resultSet.getMetaData();
+
+            Field[] fields = zClass.getDeclaredFields();
+
+            if (resultSet.next()){
+                for(Field field : fields) {
+                    field.setAccessible(true);
+                    if(field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(OneToOne.class)){
+                        String columnName = field.getAnnotation(Column.class).name();
+                        Object columnValue = resultSet.getObject(columnName);
+                        field.set(resObject, columnValue);
+                    }
+                }
+            }
+
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    DBConnectionImpl.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+
+        return resObject;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

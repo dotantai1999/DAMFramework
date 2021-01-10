@@ -85,4 +85,16 @@ public class UserModel extends SessionImpl<UserModel> {
     public void setAddress(AddressEntity address) {
         this.address = address;
     }
+
+    @Override
+    public String toString() {
+        return "UserModel{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", registeredDate=" + registeredDate +
+                ", address=" + address +
+                '}';
+    }
 }
