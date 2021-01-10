@@ -3,6 +3,7 @@ package dto;
 import annotation.*;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -26,6 +27,9 @@ public class UserEntity {
 	@OneToOne
 	@JoinColumn(name = "address", referenceColumnName = "address_id")
 	private AddressEntity address;
+
+	@OneToMany
+	private List<PostEntity> listPosts;
 
 	public UserEntity() {
 	}
@@ -86,6 +90,14 @@ public class UserEntity {
 		this.address = address;
 	}
 
+	public List<PostEntity> getListPosts() {
+		return listPosts;
+	}
+
+	public void setListPosts(List<PostEntity> listPosts) {
+		this.listPosts = listPosts;
+	}
+
 	@Override
 	public String toString() {
 		return "UserEntity{" +
@@ -95,6 +107,7 @@ public class UserEntity {
 				", email='" + email + '\'' +
 				", registeredDate=" + registeredDate +
 				", address=" + address +
+				", listPosts=" + listPosts +
 				'}';
 	}
 }

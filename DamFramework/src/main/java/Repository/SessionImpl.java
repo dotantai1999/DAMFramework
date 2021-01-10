@@ -1,9 +1,16 @@
 package Repository;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigInteger;
 import java.sql.*;
+import java.util.Collection;
+import java.util.Iterator;
 
 import annotation.*;
+import javafx.scene.control.Tab;
+
+import javax.swing.plaf.nimbus.State;
 
 public class SessionImpl<T> implements ISession<T>{
 
@@ -61,6 +68,54 @@ public class SessionImpl<T> implements ISession<T>{
         String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
         return sql;
     }
+
+    private String createSqlInsertV2(Object object) {
+        String tableName = "";
+        Class zClass = object.getClass();
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = (Table) zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+
+        StringBuilder fields = new StringBuilder("");
+        StringBuilder params = new StringBuilder("");
+
+        for (Field field : zClass.getDeclaredFields()) {
+            String columnName = "";
+            if (field.isAnnotationPresent(Column.class) ) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+                Column column = field.getAnnotation(Column.class);
+                columnName = column.name();
+                fields.append(columnName);
+                params.append("?");
+            }
+        }
+
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass != null) {
+            for (Field field : parentClass.getDeclaredFields()) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+
+                if (field.isAnnotationPresent(Column.class)) {
+                    Column column = field.getAnnotation(Column.class);
+                    fields.append(column.name());
+                    params.append("?");
+                }
+            }
+
+            parentClass = parentClass.getSuperclass();
+        }
+
+        String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
+        return sql;
+    }
+
     @Override
     public Object insert(Object object) {
         if(object == null) return null;
@@ -137,6 +192,85 @@ public class SessionImpl<T> implements ISession<T>{
         }
         return null;
     }
+
+    public Object insertV2(Object object) {
+        if(object == null) return null;
+        String sql = createSqlInsertV2(object);
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Object id = null;
+
+            // connect with DB
+            connection = DBConnectionImpl.getConnection();
+
+            if (connection != null) {
+                System.out.println("Ket noi thanh cong");
+            }
+
+            // dont commit when occur error and callback (transaction)
+            connection.setAutoCommit(false);
+
+            // create statement
+            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            /* setParameter(statement, parameters); */
+
+            // set param
+            Class aClass = object.getClass();
+            Field[] fields = aClass.getDeclaredFields();
+            int count = 1;
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                if(field.isAnnotationPresent(Column.class)){
+                    statement.setObject(count++, field.get(object));
+                }
+            }
+
+            // excute query
+            statement.executeUpdate();
+
+            // get Id from result in resultSet
+            resultSet = statement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                id = resultSet.getObject(1);
+            }
+
+            connection.commit();
+            return id;
+
+        } catch (SQLException | IllegalAccessException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    DBConnectionImpl.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     @Override
     public Object update(Object object) {
         String sql = "";
@@ -409,10 +543,55 @@ public class SessionImpl<T> implements ISession<T>{
         return null;
     }
 
-//	private String createSqlInsertOneToOne(Object object){
-//
-//		return
-//	}
+    public Object insertOneToMany(Object object) {
+        Object parentId = insertV2(object);
+
+        Class classA = object.getClass();
+
+        Field[] fields = object.getClass().getDeclaredFields();
+        for (Field field : fields){
+            if(field.isAnnotationPresent(OneToMany.class)){
+                ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+                Class<?> classB = (Class<?>) stringListType.getActualTypeArguments()[0];
+                String newTableName = createTable(classA, classB);
+                String columnA = ((Table) classA.getAnnotation(Table.class)).name();
+                String columnB = ((Table) classB.getAnnotation(Table.class)).name();
+
+                try {
+                    field.setAccessible(true);
+                    Object list = field.get(object);
+
+                    Collection listC = (Collection) list;
+                    Iterator iter = listC.iterator();
+
+                    if(iter.hasNext()){
+                        System.out.println(iter.next());
+                        BigInteger childId = (BigInteger) insert(iter.next());
+
+                        String sql = "INSERT INTO " + newTableName + "(" + columnA + "_id" + ", " + columnB + "_id" + ") VALUES(" + parentId + ", " + childId + ")";
+                        Connection conn = null;
+                        Statement stmt = null;
+
+                        conn = DBConnectionImpl.getConnection();
+
+                        // dont commit when occur error and callback (transaction)
+                        conn.setAutoCommit(false);
+
+                        stmt = conn.createStatement();
+
+                        stmt.executeUpdate(sql);
+
+                        conn.commit();
+                    }
+                } catch (IllegalAccessException | SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return parentId;
+    }
+
 
     public Object get(Class zClass, Object id){
         String sql = createSqlSelect(zClass);
@@ -589,5 +768,39 @@ public class SessionImpl<T> implements ISession<T>{
         System.out.println("select sql: " + sql);
 
         return sql;
+    }
+
+    private static String createTable(Class classA, Class classB) {
+        String tableA = "";
+        String tableB = "";
+
+        if(classA.isAnnotationPresent(Table.class) && classA.isAnnotationPresent(Entity.class)){
+            Table table = (Table) classA.getAnnotation(Table.class);
+            tableA = table.name();
+        }
+        if(classB.isAnnotationPresent(Table.class) && classB.isAnnotationPresent(Entity.class)){
+            Table table = (Table) classB.getAnnotation(Table.class);
+            tableB = table.name();
+        }
+
+        String tableName = tableA + "_" + tableB;
+
+        Connection conn = null;
+        Statement stmt = null;
+
+        try{
+            conn = DBConnectionImpl.getConnection();
+            String sql = "CREATE TABLE IF NOT EXISTS " + tableName
+                    + " (" + tableA + "_id INTEGER,"
+                    +  tableB + "_id INTEGER)";
+
+            stmt = conn.createStatement();
+            assert stmt != null;
+            stmt.executeUpdate(sql);
+            return tableName;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
     }
 }
