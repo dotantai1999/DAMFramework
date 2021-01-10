@@ -16,15 +16,18 @@ public class main {
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
 		UserEntity userEntity = new UserEntity( null, "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
-		UserEntity userEntity2 = new UserEntity("LA2", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
+		UserEntity userEntity2 = new UserEntity("LA3", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
 		System.out.println("running . . .");
 
 
 		ISession session = new SessionImpl();
+//
+//		UserEntity obj = (UserEntity) session.get(UserEntity.class, 32);
+//
+//		System.out.println("returnnnn: " + obj.toString());
+		Long id = (Long) session.insertOneToOne(userEntity2);
 
-		UserModel obj = (UserModel) session.get(UserModel.class, 32);
-
-		System.out.println("returnnnn: " + obj.toString());
+		System.out.println("returnnnnn: " + id);
 
 
 

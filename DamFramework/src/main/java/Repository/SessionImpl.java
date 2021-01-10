@@ -27,11 +27,17 @@ public class SessionImpl<T> implements ISession<T>{
                 fields.append(",");
                 params.append(",");
             }
-            if (field.isAnnotationPresent(Column.class)) {
+            String columnName = "";
+            if (field.isAnnotationPresent(Column.class) ) {
                 Column column = field.getAnnotation(Column.class);
-                fields.append(column.name());
-                params.append("?");
+                columnName = column.name();
             }
+            if (field.isAnnotationPresent(JoinColumn.class)){
+                JoinColumn column = field.getAnnotation(JoinColumn.class);
+                columnName = column.name();
+            }
+            fields.append(columnName);
+            params.append("?");
         }
 
         Class<?> parentClass = zClass.getSuperclass();
@@ -57,6 +63,7 @@ public class SessionImpl<T> implements ISession<T>{
     }
     @Override
     public Object insert(Object object) {
+        if(object == null) return null;
         String sql = createSqlInsert(object);
 
         Connection connection = null;
@@ -298,7 +305,7 @@ public class SessionImpl<T> implements ISession<T>{
         Object oneToOneObj = null;
         Object insertedId = null;
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class) && field.isAnnotationPresent(OneToOne.class)) {
+            if (field.isAnnotationPresent(JoinColumn.class) && field.isAnnotationPresent(OneToOne.class)) {
                 field.setAccessible(true);
                 try {
                     oneToOneObj = field.get(object);
@@ -354,7 +361,7 @@ public class SessionImpl<T> implements ISession<T>{
                 int index = i + 1;
                 Field field = fields[i];
                 field.setAccessible(true);
-                if (field.isAnnotationPresent(Column.class) && field.isAnnotationPresent(OneToOne.class)) {
+                if (field.isAnnotationPresent(JoinColumn.class) && field.isAnnotationPresent(OneToOne.class)) {
                     statement.setObject(index, insertedId);
                 } else {
                     statement.setObject(index, field.get(object));
@@ -450,7 +457,7 @@ public class SessionImpl<T> implements ISession<T>{
             if (resultSet.next()){
                 for(Field field : fields) {
                     field.setAccessible(true);
-                    if(field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(OneToOne.class)){
+                    if(field.isAnnotationPresent(Column.class)){
                         String columnName = field.getAnnotation(Column.class).name();
                         Object columnValue = resultSet.getObject(columnName);
                         field.set(resObject, columnValue);

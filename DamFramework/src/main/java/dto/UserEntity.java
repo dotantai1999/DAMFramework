@@ -24,7 +24,7 @@ public class UserEntity {
 	private Date registeredDate;
 
 	@OneToOne
-	@Column(name = "address")
+	@JoinColumn(name = "address", referenceColumnName = "address_id")
 	private AddressEntity address;
 
 	public UserEntity() {
@@ -84,5 +84,17 @@ public class UserEntity {
 
 	public void setAddress(AddressEntity address) {
 		this.address = address;
+	}
+
+	@Override
+	public String toString() {
+		return "UserEntity{" +
+				"userId=" + userId +
+				", userName='" + userName + '\'' +
+				", password='" + password + '\'' +
+				", email='" + email + '\'' +
+				", registeredDate=" + registeredDate +
+				", address=" + address +
+				'}';
 	}
 }
