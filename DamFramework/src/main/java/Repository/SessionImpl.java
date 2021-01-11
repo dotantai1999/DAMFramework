@@ -241,6 +241,18 @@ public class SessionImpl<T> implements ISession<T>{
             }
 
             connection.commit();
+
+            // set ID cho object sau khi Insert thành công
+            for (Field field : fields) {
+                if(field.isAnnotationPresent(Id.class)){
+                    field.setAccessible(true);
+                    if (id instanceof BigInteger) {
+                        String strValue = ((BigInteger) id).toString();
+                        id = Integer.parseInt(strValue);
+                    }
+                    field.set(object, id);
+                }
+            }
             return id;
 
         } catch (SQLException | IllegalAccessException e) {
@@ -564,8 +576,7 @@ public class SessionImpl<T> implements ISession<T>{
                     Collection listC = (Collection) list;
                     Iterator iter = listC.iterator();
 
-                    if(iter.hasNext()){
-                        System.out.println(iter.next());
+                    while(iter.hasNext()){
                         BigInteger childId = (BigInteger) insert(iter.next());
 
                         String sql = "INSERT INTO " + newTableName + "(" + columnA + "_id" + ", " + columnB + "_id" + ") VALUES(" + parentId + ", " + childId + ")";

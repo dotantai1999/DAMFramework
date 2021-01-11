@@ -22,7 +22,7 @@ public class main {
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
 		UserEntity userEntity = new UserEntity( null, "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
-		UserEntity userEntity2 = new UserEntity("LA4", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
+		UserEntity userEntity2 = new UserEntity("LA5", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
 		System.out.println("running . . .");
 
 
@@ -38,12 +38,12 @@ public class main {
 //		SessionImpl.createTable(UserEntity.class, AddressEntity.class);
 
 		List<PostEntity> listPosts = new LinkedList<>();
-		listPosts.add(new PostEntity("This is title 1"));
-		listPosts.add(new PostEntity("This is title 2"));
+		listPosts.add(new PostEntity("This is title 3"));
+		listPosts.add(new PostEntity("This is title 4"));
 
 		userEntity2.setListPosts(listPosts);
 
-		BigInteger id = (BigInteger) session.insertOneToMany(userEntity2);
+		Integer id = (Integer) session.insertOneToMany(userEntity2);
 		System.out.println("inserted Id : " + id);
 
 
