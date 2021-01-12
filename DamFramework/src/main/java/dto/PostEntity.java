@@ -1,9 +1,6 @@
 package dto;
 
-import annotation.Column;
-import annotation.Entity;
-import annotation.Id;
-import annotation.Table;
+import annotation.*;
 
 @Entity
 @Table(name = "post")
@@ -15,15 +12,25 @@ public class PostEntity {
     @Column(name = "title")
     private String postTitle;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", referenceColumnName = "user_id")
+    private UserEntity user;
+
     public PostEntity() {
     }
 
-    public PostEntity(String postTitle) {
+    public PostEntity(String postTitle, UserEntity user) {
+        this.postId = postId;
         this.postTitle = postTitle;
+        this.user = user;
     }
 
     public int getPostId() {
         return postId;
+    }
+
+    public void setPostId(int postId) {
+        this.postId = postId;
     }
 
     public String getPostTitle() {
@@ -32,5 +39,22 @@ public class PostEntity {
 
     public void setPostTitle(String postTitle) {
         this.postTitle = postTitle;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "PostEntity{" +
+                "postId=" + postId +
+                ", postTitle='" + postTitle + '\'' +
+                ", user=" + user +
+                '}';
     }
 }

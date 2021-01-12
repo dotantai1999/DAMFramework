@@ -6,5 +6,6 @@ public interface ISession<T> {
 	void delete(Object object);
 	Object insertOneToOne(Object object);
 	Object insertOneToMany(Object object);
+	Object insertManyToOne(Object object);
 	Object get(Class zClass, Object id);
 }

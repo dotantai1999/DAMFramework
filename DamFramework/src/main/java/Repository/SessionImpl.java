@@ -18,104 +18,6 @@ public class SessionImpl<T> implements ISession<T>{
 
     }
 
-    private String createSqlInsert(Object object) {
-        String tableName = "";
-        Class zClass = object.getClass();
-        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
-            Table tableClass = (Table) zClass.getAnnotation(Table.class);
-            tableName = tableClass.name();
-        }
-
-        StringBuilder fields = new StringBuilder("");
-        StringBuilder params = new StringBuilder("");
-
-        for (Field field : zClass.getDeclaredFields()) {
-            if (fields.length() > 1) {
-                fields.append(",");
-                params.append(",");
-            }
-            String columnName = "";
-            if (field.isAnnotationPresent(Column.class) ) {
-                Column column = field.getAnnotation(Column.class);
-                columnName = column.name();
-            }
-            if (field.isAnnotationPresent(JoinColumn.class)){
-                JoinColumn column = field.getAnnotation(JoinColumn.class);
-                columnName = column.name();
-            }
-            fields.append(columnName);
-            params.append("?");
-        }
-
-        Class<?> parentClass = zClass.getSuperclass();
-        while (parentClass != null) {
-            for (Field field : parentClass.getDeclaredFields()) {
-                if (fields.length() > 1) {
-                    fields.append(",");
-                    params.append(",");
-                }
-
-                if (field.isAnnotationPresent(Column.class)) {
-                    Column column = field.getAnnotation(Column.class);
-                    fields.append(column.name());
-                    params.append("?");
-                }
-            }
-
-            parentClass = parentClass.getSuperclass();
-        }
-
-        String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
-        return sql;
-    }
-
-    private String createSqlInsertV2(Object object) {
-        String tableName = "";
-        Class zClass = object.getClass();
-        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
-            Table tableClass = (Table) zClass.getAnnotation(Table.class);
-            tableName = tableClass.name();
-        }
-
-        StringBuilder fields = new StringBuilder("");
-        StringBuilder params = new StringBuilder("");
-
-        for (Field field : zClass.getDeclaredFields()) {
-            String columnName = "";
-            if (field.isAnnotationPresent(Column.class) ) {
-                if (fields.length() > 1) {
-                    fields.append(",");
-                    params.append(",");
-                }
-                Column column = field.getAnnotation(Column.class);
-                columnName = column.name();
-                fields.append(columnName);
-                params.append("?");
-            }
-        }
-
-        Class<?> parentClass = zClass.getSuperclass();
-        while (parentClass != null) {
-            for (Field field : parentClass.getDeclaredFields()) {
-                if (fields.length() > 1) {
-                    fields.append(",");
-                    params.append(",");
-                }
-
-                if (field.isAnnotationPresent(Column.class)) {
-                    Column column = field.getAnnotation(Column.class);
-                    fields.append(column.name());
-                    params.append("?");
-                }
-            }
-
-            parentClass = parentClass.getSuperclass();
-        }
-
-        String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
-        return sql;
-    }
-
     @Override
     public Object insert(Object object) {
         if(object == null) return null;
@@ -227,6 +129,27 @@ public class SessionImpl<T> implements ISession<T>{
                 field.setAccessible(true);
                 if(field.isAnnotationPresent(Column.class)){
                     statement.setObject(count++, field.get(object));
+                }
+                if(field.isAnnotationPresent(ManyToOne.class) && field.isAnnotationPresent(JoinColumn.class)){
+                    JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                    String refColName = joinColumn.referenceColumnName();
+
+                    // trường được đánh Annotation là ManyToOne
+                    Object manyToOneObject = field.get(object);
+
+                    // các fields trong class của đối manyToOneObject
+                    Field[] refEntityFields = manyToOneObject.getClass().getDeclaredFields();
+
+                    for (Field field1 : refEntityFields) {
+                        field1.setAccessible(true);
+                        if(field1.isAnnotationPresent(Column.class)){
+                            Column column = field1.getAnnotation(Column.class);
+                            if(refColName.equals(column.name())){
+                                statement.setObject(count++, field1.get(object));
+                            }
+
+                        }
+                    }
                 }
             }
 
@@ -455,36 +378,20 @@ public class SessionImpl<T> implements ISession<T>{
                 field.setAccessible(true);
                 try {
                     oneToOneObj = field.get(object);
-                    insertedId = insert(oneToOneObj);
+                    insertedId = insertV2(oneToOneObj);
                 } catch (IllegalAccessException e) {
 
                 }
             }
         }
 
-        // get fkey
-//        Object oneToOneId = null;
-//        Class<?> oClass = oneToOneObj.getClass();
-//        fields = oClass.getDeclaredFields();
-//        for (Field field : fields) {
-//            if (field.isAnnotationPresent(Column.class) && field.isAnnotationPresent(Id.class)) {
-//                field.setAccessible(true);
-//                try {
-//                    oneToOneId = field.get(oneToOneObj);
-//                    System.out.println(oneToOneId);
-//                } catch (IllegalAccessException e) {
-//
-//                }
-//            }
-//        }
-
-        String sql = createSqlInsert(object);
+        String sql = createSqlInsertV2(object);
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
         try {
-            Long id = null;
+            Object id = null;
 
             // connect with DB
             connection = DBConnectionImpl.getConnection();
@@ -507,10 +414,11 @@ public class SessionImpl<T> implements ISession<T>{
                 int index = i + 1;
                 Field field = fields[i];
                 field.setAccessible(true);
+                if (field.isAnnotationPresent(Column.class)){
+                    statement.setObject(index, field.get(object));
+                }
                 if (field.isAnnotationPresent(JoinColumn.class) && field.isAnnotationPresent(OneToOne.class)) {
                     statement.setObject(index, insertedId);
-                } else {
-                    statement.setObject(index, field.get(object));
                 }
             }
 
@@ -521,7 +429,19 @@ public class SessionImpl<T> implements ISession<T>{
             resultSet = statement.getGeneratedKeys();
 
             if (resultSet.next()) {
-                id = resultSet.getLong(1);
+                id = resultSet.getObject(1);
+            }
+
+            // set ID cho object sau khi Insert thành công
+            for (Field field : fields) {
+                if(field.isAnnotationPresent(Id.class)){
+                    field.setAccessible(true);
+                    if (id instanceof BigInteger) {
+                        String strValue = ((BigInteger) id).toString();
+                        id = Integer.parseInt(strValue);
+                    }
+                    field.set(object, id);
+                }
             }
 
             connection.commit();
@@ -555,6 +475,7 @@ public class SessionImpl<T> implements ISession<T>{
         return null;
     }
 
+    @Override
     public Object insertOneToMany(Object object) {
         Object parentId = insertV2(object);
 
@@ -601,6 +522,119 @@ public class SessionImpl<T> implements ISession<T>{
         }
 
         return parentId;
+    }
+
+
+    @Override
+    public Object insertManyToOne(Object object) {
+        if(object == null) return null;
+        String sql = createSqlInsertV2(object);
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Object id = null;
+
+            // connect with DB
+            connection = DBConnectionImpl.getConnection();
+
+            if (connection != null) {
+                System.out.println("Ket noi thanh cong");
+            }
+
+            // dont commit when occur error and callback (transaction)
+            connection.setAutoCommit(false);
+
+            // create statement
+            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            /* setParameter(statement, parameters); */
+
+            // set param
+            Class aClass = object.getClass();
+            Field[] fields = aClass.getDeclaredFields();
+            int count = 1;
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                if(field.isAnnotationPresent(Column.class)){
+                    statement.setObject(count++, field.get(object));
+                }
+                if(field.isAnnotationPresent(ManyToOne.class) && field.isAnnotationPresent(JoinColumn.class)){
+                    JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                    String refColName = joinColumn.referenceColumnName();
+
+                    // trường được đánh Annotation là ManyToOne
+                    Object manyToOneObject = field.get(object);
+
+                    // các fields trong class của manyToOneObject
+                    Field[] refEntityFields = manyToOneObject.getClass().getDeclaredFields();
+
+                    for (Field field1 : refEntityFields) {
+                        field1.setAccessible(true);
+                        if(field1.isAnnotationPresent(Column.class)){
+                            Column column = field1.getAnnotation(Column.class);
+                            if(refColName.equals(column.name())){
+                                statement.setObject(count++, field1.get(manyToOneObject));
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            // excute query
+            statement.executeUpdate();
+
+            // get Id from result in resultSet
+            resultSet = statement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                id = resultSet.getObject(1);
+            }
+
+            connection.commit();
+
+            // set ID cho object sau khi Insert thành công
+            for (Field field : fields) {
+                if(field.isAnnotationPresent(Id.class)){
+                    field.setAccessible(true);
+                    if (id instanceof BigInteger) {
+                        String strValue = ((BigInteger) id).toString();
+                        id = Integer.parseInt(strValue);
+                    }
+                    field.set(object, id);
+                }
+            }
+            return id;
+
+        } catch (SQLException | IllegalAccessException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    DBConnectionImpl.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+        return null;
     }
 
 
@@ -813,5 +847,125 @@ public class SessionImpl<T> implements ISession<T>{
             throwables.printStackTrace();
         }
         return null;
+    }
+
+    private String createSqlInsert(Object object) {
+        String tableName = "";
+        Class zClass = object.getClass();
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = (Table) zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+
+        StringBuilder fields = new StringBuilder("");
+        StringBuilder params = new StringBuilder("");
+
+        for (Field field : zClass.getDeclaredFields()) {
+            if (fields.length() > 1) {
+                fields.append(",");
+                params.append(",");
+            }
+            String columnName = "";
+            if (field.isAnnotationPresent(Column.class) ) {
+                Column column = field.getAnnotation(Column.class);
+                columnName = column.name();
+            }
+            if (field.isAnnotationPresent(JoinColumn.class)){
+                JoinColumn column = field.getAnnotation(JoinColumn.class);
+                columnName = column.name();
+            }
+            fields.append(columnName);
+            params.append("?");
+        }
+
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass != null) {
+            for (Field field : parentClass.getDeclaredFields()) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+
+                if (field.isAnnotationPresent(Column.class)) {
+                    Column column = field.getAnnotation(Column.class);
+                    fields.append(column.name());
+                    params.append("?");
+                }
+            }
+
+            parentClass = parentClass.getSuperclass();
+        }
+
+        String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
+        return sql;
+    }
+
+    private String createSqlInsertV2(Object object) {
+        String tableName = "";
+        Class zClass = object.getClass();
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = (Table) zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+
+        StringBuilder fields = new StringBuilder("");
+        StringBuilder params = new StringBuilder("");
+
+        for (Field field : zClass.getDeclaredFields()) {
+            String columnName = "";
+            if (field.isAnnotationPresent(Column.class) ) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+                Column column = field.getAnnotation(Column.class);
+                columnName = column.name();
+                fields.append(columnName);
+                params.append("?");
+            }
+
+            if (field.isAnnotationPresent(OneToOne.class) && field.isAnnotationPresent(JoinColumn.class)) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+                JoinColumn column = field.getAnnotation(JoinColumn.class);
+                columnName = column.name();
+                fields.append(columnName);
+                params.append("?");
+            }
+
+            if (field.isAnnotationPresent(ManyToOne.class) && field.isAnnotationPresent(JoinColumn.class)) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+                JoinColumn column = field.getAnnotation(JoinColumn.class);
+                columnName = column.name();
+                fields.append(columnName);
+                params.append("?");
+            }
+        }
+
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass != null) {
+            for (Field field : parentClass.getDeclaredFields()) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+
+                if (field.isAnnotationPresent(Column.class)) {
+                    Column column = field.getAnnotation(Column.class);
+                    fields.append(column.name());
+                    params.append("?");
+                }
+            }
+
+            parentClass = parentClass.getSuperclass();
+        }
+
+        String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
+        return sql;
     }
 }

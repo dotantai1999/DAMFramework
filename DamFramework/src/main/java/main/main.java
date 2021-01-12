@@ -18,36 +18,22 @@ import java.util.List;
 
 public class main {
 	public static void main(String[] args) {
+		ISession session = new SessionImpl();
 
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
-		UserEntity userEntity = new UserEntity( null, "12345", "fafaffaafa@gmail.com", now, new AddressEntity("SG"));
-		UserEntity userEntity2 = new UserEntity("LA5", "12345", "123456@gmail.com", now, new AddressEntity("DN"));
-		System.out.println("running . . .");
+		UserEntity userEntity = new UserEntity( "Sonnnn", "12345", "emailllll@gmail.com", now, new AddressEntity("SG"));
 
-
-		ISession session = new SessionImpl();
-//
-//		UserEntity obj = (UserEntity) session.get(UserEntity.class, 32);
-//
-//		System.out.println("returnnnn: " + obj.toString());
-//		Long id = (Long) session.insertOneToOne(userEntity2);
-
-//		System.out.println("returnnnnn: " + id);
-
-//		SessionImpl.createTable(UserEntity.class, AddressEntity.class);
+		Integer id = (Integer) session.insertOneToOne(userEntity);
 
 		List<PostEntity> listPosts = new LinkedList<>();
-		listPosts.add(new PostEntity("This is title 3"));
-		listPosts.add(new PostEntity("This is title 4"));
+		PostEntity post1 = new PostEntity("Title 01", userEntity);
+		PostEntity post2 = new PostEntity("Title 02", userEntity);
 
-		userEntity2.setListPosts(listPosts);
+		session.insertManyToOne(post1);
+		session.insertManyToOne(post2);
 
-		Integer id = (Integer) session.insertOneToMany(userEntity2);
-		System.out.println("inserted Id : " + id);
-
-
-//		userEntity2.setUserId(32);
-//		session.update(userEntity2);
+		System.out.println("post1: " + post1);
+		System.out.println("post2: " + post2);
 	}
 }
