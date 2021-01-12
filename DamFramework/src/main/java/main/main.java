@@ -8,6 +8,8 @@ import dto.AddressEntity;
 import dto.PostEntity;
 import dto.UserEntity;
 import dto.UserModel;
+import serviceImpl.InsertManyToOne;
+import serviceImpl.InsertOneToOne;
 
 import java.math.BigInteger;
 import java.util.LinkedList;
@@ -22,16 +24,19 @@ public class main {
 
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date now = new java.sql.Date(utilDate.getTime());
-		UserEntity userEntity = new UserEntity( "Sonnnn", "12345", "emailllll@gmail.com", now, new AddressEntity("SG"));
+		UserEntity userEntity = new UserEntity( "SonNT", "12345", "emailllll@gmail.com", now, new AddressEntity("HP"));
 
-		Integer id = (Integer) session.insertOneToOne(userEntity);
+		session.setInsertor(new InsertOneToOne());
+
+		Integer id = (Integer) session.insert(userEntity);
 
 		List<PostEntity> listPosts = new LinkedList<>();
-		PostEntity post1 = new PostEntity("Title 01", userEntity);
-		PostEntity post2 = new PostEntity("Title 02", userEntity);
+		PostEntity post1 = new PostEntity("Title 05", userEntity);
+		PostEntity post2 = new PostEntity("Title 06", userEntity);
 
-		session.insertManyToOne(post1);
-		session.insertManyToOne(post2);
+		session.setInsertor(new InsertManyToOne());
+		session.insert(post1);
+		session.insert(post2);
 
 		System.out.println("post1: " + post1);
 		System.out.println("post2: " + post2);
