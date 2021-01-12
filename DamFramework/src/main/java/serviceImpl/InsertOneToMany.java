@@ -4,6 +4,7 @@ import Repository.DBConnectionImpl;
 import annotation.OneToMany;
 import annotation.Table;
 import helper.QueryCreator;
+import service.Insertor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -14,10 +15,10 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class InsertOneToMany {
+public class InsertOneToMany implements Insertor {
     QueryCreator query = new QueryCreator();
 
-    public Object insertOneToMany(Object object) {
+    public Object insert(Object object) {
         SimpleInsert si = new SimpleInsert();
         Object parentId = si.insert(object);
 

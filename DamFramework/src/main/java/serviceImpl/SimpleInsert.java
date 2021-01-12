@@ -6,12 +6,13 @@ import annotation.Id;
 import annotation.JoinColumn;
 import annotation.ManyToOne;
 import helper.QueryCreator;
+import service.Insertor;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.sql.*;
 
-public class SimpleInsert {
+public class SimpleInsert implements Insertor {
 
     QueryCreator query = new QueryCreator();
 

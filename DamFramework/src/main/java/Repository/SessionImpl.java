@@ -1,25 +1,18 @@
 package Repository;
 
+import annotation.Column;
+import helper.InsertorFactory;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.math.BigInteger;
 import java.sql.*;
-import java.util.Collection;
-import java.util.Iterator;
-import helper.QueryCreator;
 
-import annotation.*;
-import javafx.scene.control.Tab;
-import service.Insertor;
-
-import javax.swing.plaf.nimbus.State;
-
-public class SessionImpl<T> extends ISession<T>{
+public class SessionImpl<T> extends ISession<T> {
 
     public SessionImpl() {
     }
 
     public Object insert(Object object) {
+        this.insertor = InsertorFactory.getInsertor(object);
         return insertor.insert(object);
     }
 
@@ -52,7 +45,7 @@ public class SessionImpl<T> extends ISession<T>{
             connection.setAutoCommit(false);
 
             // create statement
-            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             /* setParameter(statement, parameters); */
 
             // set param
@@ -106,6 +99,7 @@ public class SessionImpl<T> extends ISession<T>{
         }
         return null;
     }
+
     @Override
     public void delete(Object object) {
         String sql = null;
@@ -130,7 +124,7 @@ public class SessionImpl<T> extends ISession<T>{
             connection.setAutoCommit(false);
 
             // create statement
-            statement = connection.prepareStatement(sql.toString());
+            statement = connection.prepareStatement(sql);
             /* setParameter(statement, parameters); */
 
             // set param
@@ -180,7 +174,7 @@ public class SessionImpl<T> extends ISession<T>{
         }
     }
 
-    public Object get(Class zClass, Object id){
+    public Object get(Class zClass, Object id) {
         String sql = query.createSqlSelect(zClass);
 
         Connection connection = null;
@@ -204,7 +198,7 @@ public class SessionImpl<T> extends ISession<T>{
             connection.setAutoCommit(false);
 
             // create statement
-            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             /* setParameter(statement, parameters); */
 
 
@@ -220,10 +214,10 @@ public class SessionImpl<T> extends ISession<T>{
 
             Field[] fields = zClass.getDeclaredFields();
 
-            if (resultSet.next()){
-                for(Field field : fields) {
+            if (resultSet.next()) {
+                for (Field field : fields) {
                     field.setAccessible(true);
-                    if(field.isAnnotationPresent(Column.class)){
+                    if (field.isAnnotationPresent(Column.class)) {
                         String columnName = field.getAnnotation(Column.class).name();
                         Object columnValue = resultSet.getObject(columnName);
                         field.set(resObject, columnValue);
