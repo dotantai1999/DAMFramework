@@ -19,6 +19,10 @@ public class PostEntity {
     public PostEntity() {
     }
 
+    public PostEntity(String postTitle) {
+        this.postTitle = postTitle;
+    }
+
     public PostEntity(String postTitle, UserEntity user) {
         this.postId = postId;
         this.postTitle = postTitle;

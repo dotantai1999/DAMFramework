@@ -24,9 +24,9 @@ public class UserEntity {
 	@Column(name = "registered_date")
 	private Date registeredDate;
 
-	@OneToOne
-	@JoinColumn(name = "address", referenceColumnName = "address_id")
-	private AddressEntity address;
+//	@OneToOne
+//	@JoinColumn(name = "address", referenceColumnName = "address_id")
+//	private AddressEntity address;
 
 	@OneToMany
 	private List<PostEntity> listPosts;
@@ -34,12 +34,11 @@ public class UserEntity {
 	public UserEntity() {
 	}
 
-	public UserEntity(String userName, String password, String email, Date registeredDate, AddressEntity address) {
+	public UserEntity(String userName, String password, String email, Date registeredDate) {
 		this.userName = userName;
 		this.password = password;
 		this.email = email;
 		this.registeredDate = registeredDate;
-		this.address = address;
 	}
 
 	public Integer getUserId() {
@@ -82,13 +81,13 @@ public class UserEntity {
 		this.registeredDate = registeredDate;
 	}
 
-	public AddressEntity getAddress() {
-		return address;
-	}
-
-	public void setAddress(AddressEntity address) {
-		this.address = address;
-	}
+//	public AddressEntity getAddress() {
+//		return address;
+//	}
+//
+//	public void setAddress(AddressEntity address) {
+//		this.address = address;
+//	}
 
 	public List<PostEntity> getListPosts() {
 		return listPosts;
@@ -106,7 +105,7 @@ public class UserEntity {
 				", password='" + password + '\'' +
 				", email='" + email + '\'' +
 				", registeredDate=" + registeredDate +
-				", address=" + address +
+//				", address=" + address +
 				", listPosts=" + listPosts +
 				'}';
 	}
