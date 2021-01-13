@@ -267,7 +267,7 @@ public class QueryCreator {
         String tableName = entity.getClass().getAnnotation(Table.class).name();
         String refTableName = oneToOneField.getType().getAnnotation(Table.class).name();
 
-        HashMap<String, Object> idData = getIdColumn(entity);
+        HashMap<String, Object> idData = getIdColumn(entity, "colName", "value");
 
         String sql = "SELECT " + refTableName + ".*" +
                 " FROM " + tableName + " JOIN " + refTableName +
@@ -277,7 +277,19 @@ public class QueryCreator {
         return sql;
     }
 
-    public HashMap<String, Object> getIdColumn(Object obj) {
+    public String createGetRefColValueQuery(Object entity, Field refField){
+        String fieldColName = refField.getAnnotation(JoinColumn.class).name();
+        String tableName = entity.getClass().getAnnotation(Table.class).name();
+
+        String idValueKey = "idValue";
+        String idColNameKey = "idColName";
+        HashMap<String, Object> idData = getIdColumn(entity, idValueKey, idColNameKey);
+
+        String sql = "SELECT " + fieldColName + " FROM " + tableName + " WHERE " + idData.get(idColNameKey) + " = " + idData.get(idValueKey);
+        return sql;
+    }
+
+    public HashMap<String, Object> getIdColumn(Object obj, String idValueKey, String colNameKey) {
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.isAnnotationPresent(Id.class)) {
@@ -286,8 +298,8 @@ public class QueryCreator {
                     String idColumnName = field.getAnnotation(Column.class).name();
                     Object idColumnValue = field.get(obj);
                     HashMap<String, Object> result = new HashMap<>();
-                    result.put("value", idColumnValue);
-                    result.put("colName", idColumnName);
+                    result.put(idValueKey, idColumnValue);
+                    result.put(colNameKey, idColumnName);
                     return result;
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();

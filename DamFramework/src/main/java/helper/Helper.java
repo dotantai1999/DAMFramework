@@ -1,7 +1,9 @@
 package helper;
 
 import annotation.Column;
+import annotation.OneToOne;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,5 +37,17 @@ public class Helper {
         }
 
         return null;
+    }
+
+    public static boolean hasRelationship (Class entityClass, Class annotation) {
+        Field[] fields = entityClass.getDeclaredFields();
+
+        for(Field field : fields) {
+            if(field.isAnnotationPresent(annotation)){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

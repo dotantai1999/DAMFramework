@@ -1,9 +1,6 @@
 package dto;
 
-import annotation.Column;
-import annotation.Entity;
-import annotation.Id;
-import annotation.Table;
+import annotation.*;
 
 @Entity
 @Table(name = "address")
@@ -14,6 +11,10 @@ public class AddressEntity {
 
     @Column(name = "detail")
     private String detail;
+
+    @OneToOne
+    @JoinColumn(name = "district", referenceColumnName = "district_id")
+    private DistrictEntity district;
 
     public AddressEntity() {
     }
@@ -38,11 +39,25 @@ public class AddressEntity {
         this.detail = detail;
     }
 
+    public AddressEntity(String detail, DistrictEntity district) {
+        this.detail = detail;
+        this.district = district;
+    }
+
+    public DistrictEntity getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(DistrictEntity district) {
+        this.district = district;
+    }
+
     @Override
     public String toString() {
         return "AddressEntity{" +
                 "addressId=" + addressId +
                 ", detail='" + detail + '\'' +
+                ", district=" + district +
                 '}';
     }
 }

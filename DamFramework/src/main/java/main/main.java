@@ -4,10 +4,6 @@ import Repository.ISession;
 import Repository.SessionImpl;
 import dto.*;
 
-import java.sql.Date;
-import java.util.LinkedList;
-import java.util.List;
-
 public class main {
     public static void main(String[] args) {
         ISession session = new SessionImpl();
@@ -38,6 +34,7 @@ public class main {
 //        user.setListPosts(posts);
 //        Integer id = (Integer) session.insert(user);
 //        System.out.println("Inserted Id: " + id);
+
 
 
         UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
