@@ -2,6 +2,7 @@ package Repository;
 
 import helper.QueryCreator;
 import service.Insertor;
+import service.Selector;
 
 public abstract class ISession<T> {
 	protected QueryCreator query = new QueryCreator();
@@ -22,4 +23,5 @@ public abstract class ISession<T> {
 	public abstract Object update(Object object);
 	public abstract void delete(Object object);
 	public abstract Object get(Class zClass, Object id);
+	public abstract Object select(Class zClass, Object id);
 }

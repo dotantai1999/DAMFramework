@@ -15,6 +15,9 @@ public class AddressEntity {
     @Column(name = "detail")
     private String detail;
 
+    public AddressEntity() {
+    }
+
     public AddressEntity(String detail) {
         this.detail = detail;
     }

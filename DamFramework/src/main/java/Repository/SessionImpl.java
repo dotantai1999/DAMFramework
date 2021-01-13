@@ -2,6 +2,9 @@ package Repository;
 
 import annotation.Column;
 import helper.InsertorFactory;
+import service.Selector;
+import serviceImpl.OneToOneSelectDecorator;
+import serviceImpl.SimpleSelector;
 
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -174,6 +177,7 @@ public class SessionImpl<T> extends ISession<T> {
         }
     }
 
+    @Override
     public Object get(Class zClass, Object id) {
         String sql = query.createSqlSelect(zClass);
 
@@ -252,6 +256,13 @@ public class SessionImpl<T> extends ISession<T> {
         }
 
         return resObject;
+    }
+
+    @Override
+    public Object select(Class zClass, Object id) {
+        Selector selector = new SimpleSelector();
+        Selector wrapSelector = new OneToOneSelectDecorator(selector);
+        return wrapSelector.select(zClass, id);
     }
 
 

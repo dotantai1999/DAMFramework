@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 public class QueryCreator {
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -27,7 +28,7 @@ public class QueryCreator {
         for (Field field : fields) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(Column.class) && field.get(object) != null) {
-                sql += "AND " + field.getAnnotation(Column.class).name() + " = ? " ;
+                sql += "AND " + field.getAnnotation(Column.class).name() + " = ? ";
             }
         }
 
@@ -58,15 +59,15 @@ public class QueryCreator {
             field.setAccessible(true);
             if (field.isAnnotationPresent(Column.class)) {
 
-                if(field.isAnnotationPresent(Id.class)){
+                if (field.isAnnotationPresent(Id.class)) {
                     idField = field.getAnnotation(Column.class).name();
                     continue;
                 }
 
-                if(count++ == 1){
-                    sql += field.getAnnotation(Column.class).name() + " = ?" ;
-                }else{
-                    sql += ", " + field.getAnnotation(Column.class).name() + " = ?" ;
+                if (count++ == 1) {
+                    sql += field.getAnnotation(Column.class).name() + " = ?";
+                } else {
+                    sql += ", " + field.getAnnotation(Column.class).name() + " = ?";
                 }
             }
         }
@@ -80,7 +81,7 @@ public class QueryCreator {
     public String createSqlSelect(Class zClass) {
         String sql = "SELECT * FROM ";
         String tableName = "";
-        if(zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class)) {
+        if (zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class)) {
             Table tableClass = (Table) zClass.getAnnotation(Table.class);
             tableName = tableClass.name();
         }
@@ -93,7 +94,7 @@ public class QueryCreator {
         for (Field field : fields) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(Column.class)) {
-                if(field.isAnnotationPresent(Id.class)){
+                if (field.isAnnotationPresent(Id.class)) {
                     idField = field.getAnnotation(Column.class).name();
                     break;
                 }
@@ -110,11 +111,11 @@ public class QueryCreator {
         String tableA = "";
         String tableB = "";
 
-        if(classA.isAnnotationPresent(Table.class) && classA.isAnnotationPresent(Entity.class)){
+        if (classA.isAnnotationPresent(Table.class) && classA.isAnnotationPresent(Entity.class)) {
             Table table = (Table) classA.getAnnotation(Table.class);
             tableA = table.name();
         }
-        if(classB.isAnnotationPresent(Table.class) && classB.isAnnotationPresent(Entity.class)){
+        if (classB.isAnnotationPresent(Table.class) && classB.isAnnotationPresent(Entity.class)) {
             Table table = (Table) classB.getAnnotation(Table.class);
             tableB = table.name();
         }
@@ -124,11 +125,11 @@ public class QueryCreator {
         Connection conn = null;
         Statement stmt = null;
 
-        try{
+        try {
             conn = DBConnectionImpl.getConnection();
             String sql = "CREATE TABLE IF NOT EXISTS " + tableName
                     + " (" + tableA + "_id INTEGER,"
-                    +  tableB + "_id INTEGER)";
+                    + tableB + "_id INTEGER)";
 
             stmt = conn.createStatement();
             assert stmt != null;
@@ -148,8 +149,8 @@ public class QueryCreator {
             tableName = tableClass.name();
         }
 
-        StringBuilder fields = new StringBuilder("");
-        StringBuilder params = new StringBuilder("");
+        StringBuilder fields = new StringBuilder();
+        StringBuilder params = new StringBuilder();
 
         for (Field field : zClass.getDeclaredFields()) {
             if (fields.length() > 1) {
@@ -157,11 +158,11 @@ public class QueryCreator {
                 params.append(",");
             }
             String columnName = "";
-            if (field.isAnnotationPresent(Column.class) ) {
+            if (field.isAnnotationPresent(Column.class)) {
                 Column column = field.getAnnotation(Column.class);
                 columnName = column.name();
             }
-            if (field.isAnnotationPresent(JoinColumn.class)){
+            if (field.isAnnotationPresent(JoinColumn.class)) {
                 JoinColumn column = field.getAnnotation(JoinColumn.class);
                 columnName = column.name();
             }
@@ -199,12 +200,12 @@ public class QueryCreator {
             tableName = tableClass.name();
         }
 
-        StringBuilder fields = new StringBuilder("");
-        StringBuilder params = new StringBuilder("");
+        StringBuilder fields = new StringBuilder();
+        StringBuilder params = new StringBuilder();
 
         for (Field field : zClass.getDeclaredFields()) {
             String columnName = "";
-            if (field.isAnnotationPresent(Column.class) ) {
+            if (field.isAnnotationPresent(Column.class)) {
                 if (fields.length() > 1) {
                     fields.append(",");
                     params.append(",");
@@ -258,5 +259,41 @@ public class QueryCreator {
 
         String sql = "INSERT INTO " + tableName + "(" + fields.toString() + ") VALUES (" + params.toString() + ")";
         return sql;
+    }
+
+    public String createOneToOneSelectQuery(Object entity, Field oneToOneField) {
+        String columnName = oneToOneField.getAnnotation(JoinColumn.class).name();
+        String refColumnName = oneToOneField.getAnnotation(JoinColumn.class).referenceColumnName();
+        String tableName = entity.getClass().getAnnotation(Table.class).name();
+        String refTableName = oneToOneField.getType().getAnnotation(Table.class).name();
+
+        HashMap<String, Object> idData = getIdColumn(entity);
+
+        String sql = "SELECT " + refTableName + ".*" +
+                " FROM " + tableName + " JOIN " + refTableName +
+                " ON " + tableName + "." + columnName + " = " + refTableName + "." + refColumnName +
+                " WHERE " + tableName + "." + idData.get("colName") + " = " + idData.get("value");
+
+        return sql;
+    }
+
+    public HashMap<String, Object> getIdColumn(Object obj) {
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Id.class)) {
+                field.setAccessible(true);
+                try {
+                    String idColumnName = field.getAnnotation(Column.class).name();
+                    Object idColumnValue = field.get(obj);
+                    HashMap<String, Object> result = new HashMap<>();
+                    result.put("value", idColumnValue);
+                    result.put("colName", idColumnName);
+                    return result;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 }

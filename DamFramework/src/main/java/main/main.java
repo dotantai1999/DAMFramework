@@ -25,16 +25,23 @@ public class main {
 //
 //        Integer id = (Integer) session.insert(fresher1);
 //        System.out.println("Inserted id: " + id);
-        java.util.Date utilDate = new java.util.Date();
-        java.sql.Date now = new java.sql.Date(utilDate.getTime());
-        UserEntity user = new UserEntity("DDTai", "asdf", "ddt@gmail.com", now);
 
-        List<PostEntity> posts = new LinkedList<>();
-        posts.add(new PostEntity("Title 001"));
-        posts.add(new PostEntity("Title 002"));
 
-        user.setListPosts(posts);
-        Integer id = (Integer) session.insert(user);
-        System.out.println("Inserted Id: " + id);
+//        java.util.Date utilDate = new java.util.Date();
+//        java.sql.Date now = new java.sql.Date(utilDate.getTime());
+//        UserEntity user = new UserEntity("DDTai", "asdf", "ddt@gmail.com", now);
+//
+//        List<PostEntity> posts = new LinkedList<>();
+//        posts.add(new PostEntity("Title 001"));
+//        posts.add(new PostEntity("Title 002"));
+//
+//        user.setListPosts(posts);
+//        Integer id = (Integer) session.insert(user);
+//        System.out.println("Inserted Id: " + id);
+
+
+        UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
+        System.out.println("User: " + user);
+
     }
 }
