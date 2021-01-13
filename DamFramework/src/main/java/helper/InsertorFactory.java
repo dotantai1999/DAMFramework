@@ -1,14 +1,8 @@
 package helper;
 
-import annotation.Column;
-import annotation.ManyToOne;
-import annotation.OneToMany;
-import annotation.OneToOne;
+import annotation.*;
 import service.Insertor;
-import serviceImpl.InsertManyToOne;
-import serviceImpl.InsertOneToMany;
-import serviceImpl.InsertOneToOne;
-import serviceImpl.SimpleInsert;
+import serviceImpl.*;
 
 import java.lang.reflect.Field;
 
@@ -27,6 +21,9 @@ public class InsertorFactory {
                 }
                 if(field.isAnnotationPresent(OneToMany.class)){
                     return new InsertOneToMany();
+                }
+                if(field.isAnnotationPresent(ManyToMany.class)){
+                    return new InsertManyToMany();
                 }
         }
         return new SimpleInsert();

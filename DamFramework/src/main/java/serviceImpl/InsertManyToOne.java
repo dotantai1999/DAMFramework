@@ -68,7 +68,6 @@ public class InsertManyToOne implements Insertor {
                             if(refColName.equals(column.name())){
                                 statement.setObject(count++, field1.get(manyToOneObject));
                             }
-
                         }
                     }
                 }
