@@ -39,5 +39,8 @@ public class main {
 
         UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
         System.out.println("User: " + user);
+
+        FresherEntity fr = (FresherEntity) session.select(FresherEntity.class, 2);
+        System.out.println("Fresher: " + fr);
     }
 }

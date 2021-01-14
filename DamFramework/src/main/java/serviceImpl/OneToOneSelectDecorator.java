@@ -79,23 +79,6 @@ public class OneToOneSelectDecorator extends SelectDecorator {
                 }catch (SQLException | IllegalAccessException e){
                     e.printStackTrace();
                 }
-//                finally {
-//                    try {
-//                        if (connection != null) {
-//                            DBConnectionImpl.close();
-//                        }
-//                        if (statement != null) {
-//                            statement.close();
-//                        }
-//
-//                        if (resultSet != null) {
-//                            resultSet.close();
-//                        }
-//
-//                    } catch (SQLException e2) {
-//                        e2.printStackTrace();
-//                    }
-//                }
             }
         }
 

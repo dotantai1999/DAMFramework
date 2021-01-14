@@ -41,4 +41,16 @@ public class FresherEntity {
     public void setCourses(List<CourseEntity> courses) {
         this.courses = courses;
     }
+
+    public FresherEntity() {
+    }
+
+    @Override
+    public String toString() {
+        return "FresherEntity{" +
+                "fresherId=" + fresherId +
+                ", fresherName='" + fresherName + '\'' +
+                ", courses=" + courses +
+                '}';
+    }
 }

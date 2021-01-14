@@ -32,9 +32,6 @@ public class SimpleSelector implements Selector {
                 System.out.println("Ket noi thanh cong");
             }
 
-            // dont commit when occur error and callback (transaction)
-            connection.setAutoCommit(false);
-
             // create statement
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             /* setParameter(statement, parameters); */
@@ -44,8 +41,6 @@ public class SimpleSelector implements Selector {
 
             // excute query
             resultSet = statement.executeQuery();
-
-            connection.commit();
 
             Field[] fields = entityClass.getDeclaredFields();
 

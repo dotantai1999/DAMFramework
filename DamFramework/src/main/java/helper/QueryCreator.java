@@ -4,6 +4,7 @@ import Repository.DBConnectionImpl;
 import annotation.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -348,6 +349,24 @@ public class QueryCreator {
         String sql = "SELECT " + manyToOneColName +
                 " FROM " + entityTableName +
                 " WHERE " + entityId.get("idColName") + " = " + entityId.get("idValue");
+
+        return sql;
+    }
+
+    public String createManyToManyListIdQuery(Object entity, Field manyToManyField) {
+        String aTableName = entity.getClass().getAnnotation(Table.class).name();
+        ParameterizedType stringListType = (ParameterizedType) manyToManyField.getGenericType();
+        Class<?> classB = (Class<?>) stringListType.getActualTypeArguments()[0];
+        String bTableName = classB.getAnnotation(Table.class).name();
+
+        String generatedTableName = aTableName + "_" + bTableName;
+        HashMap<String, Object> aTableId = getIdColumn(entity, "aTableIdValue", "aTableIdColName");
+        String generatedAColName = aTableName + "_id";
+        String generatedBColName = bTableName + "_id";
+
+        String sql = "SELECT " + generatedBColName +
+                     " FROM " + generatedTableName +
+                     " WHERE " + generatedAColName + " = " + aTableId.get("aTableIdValue");
 
         return sql;
     }

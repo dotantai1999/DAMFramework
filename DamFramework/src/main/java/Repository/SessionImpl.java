@@ -1,16 +1,10 @@
 package Repository;
 
-import annotation.Column;
-import annotation.ManyToOne;
-import annotation.OneToMany;
-import annotation.OneToOne;
+import annotation.*;
 import helper.Helper;
 import helper.InsertorFactory;
 import service.Selector;
-import serviceImpl.ManyToOneSelectDecorator;
-import serviceImpl.OneToManySelectDecorator;
-import serviceImpl.OneToOneSelectDecorator;
-import serviceImpl.SimpleSelector;
+import serviceImpl.*;
 
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -275,6 +269,9 @@ public class SessionImpl<T> extends ISession<T> {
         }
         if(Helper.hasRelationship(zClass, ManyToOne.class)){
             selector = new ManyToOneSelectDecorator(selector);
+        }
+        if(Helper.hasRelationship(zClass, ManyToMany.class)){
+            selector = new ManyToManySelectDecorator(selector);
         }
         return selector.select(zClass, id);
     }

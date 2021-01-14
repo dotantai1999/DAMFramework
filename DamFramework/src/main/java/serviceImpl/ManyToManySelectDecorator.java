@@ -1,9 +1,8 @@
 package serviceImpl;
 
 import Repository.DBConnectionImpl;
-import Repository.ISession;
-import Repository.SessionImpl;
-import annotation.*;
+import annotation.ManyToMany;
+import annotation.Table;
 import helper.QueryCreator;
 import service.Selector;
 
@@ -13,13 +12,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 
-public class OneToManySelectDecorator extends SelectDecorator{
+public class ManyToManySelectDecorator extends SelectDecorator{
 
-    public OneToManySelectDecorator(Selector wrappeeSelector) {
+    public ManyToManySelectDecorator(Selector wrappeeSelector) {
         super(wrappeeSelector);
     }
 
@@ -33,23 +30,19 @@ public class OneToManySelectDecorator extends SelectDecorator{
     public Object additionalSelect(Object entity, Object id) {
         Field[] fields = entity.getClass().getDeclaredFields();
 
-        for(Field field : fields){
-            if(field.isAnnotationPresent(OneToMany.class)){
+        for(Field field : fields) {
+            if (field.isAnnotationPresent(ManyToMany.class)) {
                 field.setAccessible(true);
 
                 ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
-                Class<?> classB = (Class<?>) stringListType.getActualTypeArguments()[0];
+                Class<?> manyToManyClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+
                 QueryCreator query = new QueryCreator();
-
-                String sql = query.createGetListOneToManyId(entity, classB);
-
-                if(sql == null) continue;
+                String sql = query.createManyToManyListIdQuery(entity, field);
 
                 Connection connection = null;
                 Statement statement = null;
                 ResultSet rs = null;
-
-                Object refColValue = null;
 
                 try {
                     // connect with DB
@@ -62,35 +55,35 @@ public class OneToManySelectDecorator extends SelectDecorator{
                     // dont commit when occur error and callback (transaction)
                     connection.setAutoCommit(false);
 
-                    statement = connection.prepareStatement(sql);
+                    statement = connection.createStatement();
 
                     // excute query
                     rs = statement.executeQuery(sql);
 
                     LinkedList<Object> listObjectId = new LinkedList<>();
 
-                    while(rs.next()){
+                    while (rs.next()) {
                         listObjectId.add(rs.getObject(1));
                     }
 
-                    LinkedList<Object> listOneToManyObject = new LinkedList<>();
-                    for(Object objectId : listObjectId){
+                    LinkedList<Object> listManyToManyObject = new LinkedList<>();
+                    for (Object objectId : listObjectId) {
                         SimpleSelector ss = new SimpleSelector();
-                        Object oneToManyObject = ss.select(classB, objectId);
-                        listOneToManyObject.add(oneToManyObject);
+                        Object oneToManyObject = ss.select(manyToManyClass, objectId);
+                        listManyToManyObject.add(oneToManyObject);
                     }
 
                     connection.commit();
 
-                    field.set(entity, listOneToManyObject);
+                    field.set(entity, listManyToManyObject);
 
                     return entity;
-                }catch (SQLException | IllegalAccessException e){
+                } catch (SQLException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
         }
 
-        return entity;
+        return null;
     }
 }
