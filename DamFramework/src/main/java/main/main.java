@@ -39,6 +39,5 @@ public class main {
 
         UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
         System.out.println("User: " + user);
-
     }
 }

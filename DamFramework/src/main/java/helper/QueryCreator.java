@@ -277,7 +277,7 @@ public class QueryCreator {
         return sql;
     }
 
-    public String createGetRefColValueQuery(Object entity, Field refField){
+    public String createGetRefColValueQuery(Object entity, Field refField) {
         String fieldColName = refField.getAnnotation(JoinColumn.class).name();
         String tableName = entity.getClass().getAnnotation(Table.class).name();
 
@@ -287,6 +287,36 @@ public class QueryCreator {
 
         String sql = "SELECT " + fieldColName + " FROM " + tableName + " WHERE " + idData.get(idColNameKey) + " = " + idData.get(idValueKey);
         return sql;
+    }
+
+    public String createGetListOneToManyId(Object entity, Class<?> classB) {
+        String refTableName = classB.getAnnotation(Table.class).name();
+
+        String refTableIdColName = null;
+        String refColName = null;
+
+        Field[] bFields = classB.getDeclaredFields();
+        for (Field bField : bFields) {
+            if(bField.isAnnotationPresent(Id.class)){
+                refTableIdColName = bField.getAnnotation(Column.class).name();
+            }
+            if (bField.isAnnotationPresent(ManyToOne.class) && bField.isAnnotationPresent(JoinColumn.class)) {
+//                Class bFieldClass = bField.getClass();
+
+                if (entity.getClass() == bField.getType()) {
+                    refColName = bField.getAnnotation(JoinColumn.class).referenceColumnName();
+                }
+            }
+        }
+
+        HashMap<String, Object> entityId = getIdColumn(entity, "idValue", "idColName");
+
+        if(refTableIdColName != null && refColName != null){
+            String sql = "SELECT " + refTableIdColName + " FROM " + refTableName + " WHERE " + refColName + " = " + entityId.get("idValue");
+            return sql;
+        }
+
+        return null;
     }
 
     public HashMap<String, Object> getIdColumn(Object obj, String idValueKey, String colNameKey) {

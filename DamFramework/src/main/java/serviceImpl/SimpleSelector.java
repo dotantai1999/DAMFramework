@@ -47,9 +47,6 @@ public class SimpleSelector implements Selector {
 
             connection.commit();
 
-            // get resultSet metadata ---> get column name
-            ResultSetMetaData rsMetadata = resultSet.getMetaData();
-
             Field[] fields = entityClass.getDeclaredFields();
 
             if (resultSet.next()) {
@@ -71,23 +68,24 @@ public class SimpleSelector implements Selector {
                     e1.printStackTrace();
                 }
             }
-        } finally {
-            try {
-                if (connection != null) {
-                    DBConnectionImpl.close();
-                }
-                if (statement != null) {
-                    statement.close();
-                }
-
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-
-            } catch (SQLException e2) {
-                e2.printStackTrace();
-            }
         }
+//        finally {
+//            try {
+//                if (connection != null) {
+//                    DBConnectionImpl.close();
+//                }
+//                if (statement != null) {
+//                    statement.close();
+//                }
+//
+//                if (resultSet != null) {
+//                    resultSet.close();
+//                }
+//
+//            } catch (SQLException e2) {
+//                e2.printStackTrace();
+//            }
+//        }
 
         return resObject;
     }

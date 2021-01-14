@@ -6,6 +6,7 @@ import annotation.OneToOne;
 import helper.Helper;
 import helper.InsertorFactory;
 import service.Selector;
+import serviceImpl.OneToManySelectDecorator;
 import serviceImpl.OneToOneSelectDecorator;
 import serviceImpl.SimpleSelector;
 
@@ -267,9 +268,9 @@ public class SessionImpl<T> extends ISession<T> {
         if(Helper.hasRelationship(zClass, OneToOne.class)){
             selector = new OneToOneSelectDecorator(selector);
         }
-//        if(Helper.hasRelationship(zClass, OneToMany.class)){
-//            selector = new OneToManySelectDecorator(selector);
-//        }
+        if(Helper.hasRelationship(zClass, OneToMany.class)){
+            selector = new OneToManySelectDecorator(selector);
+        }
         return selector.select(zClass, id);
     }
 
