@@ -34,7 +34,12 @@ public class OneToOneSelectDecorator extends SelectDecorator {
                 field.setAccessible(true);
                 String colName = field.getAnnotation(JoinColumn.class).name();
                 QueryCreator query = new QueryCreator();
+
                 String sql = query.createGetRefColValueQuery(entity, field);
+
+                if(sql == null) {
+                    continue;
+                }
 
                 Connection connection = null;
                 Statement statement = null;

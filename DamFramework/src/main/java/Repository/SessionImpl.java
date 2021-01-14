@@ -1,11 +1,13 @@
 package Repository;
 
 import annotation.Column;
+import annotation.ManyToOne;
 import annotation.OneToMany;
 import annotation.OneToOne;
 import helper.Helper;
 import helper.InsertorFactory;
 import service.Selector;
+import serviceImpl.ManyToOneSelectDecorator;
 import serviceImpl.OneToManySelectDecorator;
 import serviceImpl.OneToOneSelectDecorator;
 import serviceImpl.SimpleSelector;
@@ -270,6 +272,9 @@ public class SessionImpl<T> extends ISession<T> {
         }
         if(Helper.hasRelationship(zClass, OneToMany.class)){
             selector = new OneToManySelectDecorator(selector);
+        }
+        if(Helper.hasRelationship(zClass, ManyToOne.class)){
+            selector = new ManyToOneSelectDecorator(selector);
         }
         return selector.select(zClass, id);
     }

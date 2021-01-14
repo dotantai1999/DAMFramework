@@ -338,4 +338,17 @@ public class QueryCreator {
         }
         return null;
     }
+
+    public String createGetManyToOneObjectIdQuery(Object entity, Field manyToOneField) {
+        String manyToOneColName = manyToOneField.getAnnotation(JoinColumn.class).name();
+        String entityTableName = entity.getClass().getAnnotation(Table.class).name();
+        HashMap<String, Object> entityId = getIdColumn(entity,"idValue", "idColName");
+
+
+        String sql = "SELECT " + manyToOneColName +
+                " FROM " + entityTableName +
+                " WHERE " + entityId.get("idColName") + " = " + entityId.get("idValue");
+
+        return sql;
+    }
 }

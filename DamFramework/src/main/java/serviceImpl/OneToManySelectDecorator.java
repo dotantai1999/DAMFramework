@@ -43,6 +43,8 @@ public class OneToManySelectDecorator extends SelectDecorator{
 
                 String sql = query.createGetListOneToManyId(entity, classB);
 
+                if(sql == null) continue;
+
                 Connection connection = null;
                 Statement statement = null;
                 ResultSet rs = null;
