@@ -66,9 +66,10 @@ public class ManyToOneSelectDecorator extends SelectDecorator{
                         refColValue = resultSet.getObject(colName);
                     }
 
-                    ISession innerSession = new SessionImpl();
-                    Object oneToOneObject = innerSession.select(field.getType(), refColValue);
-                    field.set(entity, oneToOneObject);
+//                    ISession innerSession = new SessionImpl();
+                    SimpleSelector ss = new SimpleSelector();
+                    Object manyToOneObject = ss.select(field.getType(), refColValue);
+                    field.set(entity, manyToOneObject);
 
                     return entity;
                 }catch (SQLException | IllegalAccessException e){

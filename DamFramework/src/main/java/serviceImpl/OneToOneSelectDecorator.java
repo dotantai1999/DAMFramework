@@ -69,8 +69,10 @@ public class OneToOneSelectDecorator extends SelectDecorator {
                         refColValue = resultSet.getObject(colName);
                     }
 
-                    ISession innerSession = new SessionImpl();
-                    Object oneToOneObject = innerSession.select(field.getType(), refColValue);
+//                    ISession innerSession = new SessionImpl();
+//                    Object oneToOneObject = innerSession.select(field.getType(), refColValue);
+                    SimpleSelector ss = new SimpleSelector();
+                    Object oneToOneObject = ss.select(field.getType(), refColValue);
                     field.set(entity, oneToOneObject);
 
                     return entity;

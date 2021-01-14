@@ -75,8 +75,8 @@ public class OneToManySelectDecorator extends SelectDecorator{
 
                     LinkedList<Object> listOneToManyObject = new LinkedList<>();
                     for(Object objectId : listObjectId){
-                        ISession innerSession = new SessionImpl();
-                        Object oneToManyObject = innerSession.select(classB, objectId);
+                        SimpleSelector ss = new SimpleSelector();
+                        Object oneToManyObject = ss.select(classB, objectId);
                         listOneToManyObject.add(oneToManyObject);
                     }
 
