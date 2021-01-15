@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Helper {
@@ -96,6 +97,22 @@ public class Helper {
                 if (field.isAnnotationPresent(Column.class)) {
                     String column = field.getName();
                     result.add(column);
+                }
+            }
+        }
+        return result;
+    }
+
+    // get hashmap <class attribute, table column>
+    public static HashMap<String, String> getMapAttributeColumn(Class zClass) {
+        HashMap<String, String> result = new HashMap<>();
+        if (zClass.isAnnotationPresent(Table.class)) {
+            Field[] fields = zClass.getDeclaredFields();
+            for (Field field : fields) {
+                if (field.isAnnotationPresent(Column.class)) {
+                    String attributeName = field.getName();
+                    String columnName = field.getAnnotation(Column.class).name();
+                    result.put(attributeName, columnName);
                 }
             }
         }

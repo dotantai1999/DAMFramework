@@ -3,6 +3,12 @@ package main;
 import Repository.ISession;
 import Repository.SessionImpl;
 import dto.*;
+import helper.Helper;
+import helper.HqlQuery;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class main {
     public static void main(String[] args) {
@@ -37,10 +43,29 @@ public class main {
 
 
 
-        UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
-        System.out.println("User: " + user);
+//        UserEntity user = (UserEntity) session.select(UserEntity.class, 68);
+//        System.out.println("User: " + user);
+//
+//        FresherEntity fr = (FresherEntity) session.select(FresherEntity.class, 2);
+//        System.out.println("Fresher: " + fr);
 
-        FresherEntity fr = (FresherEntity) session.select(FresherEntity.class, 2);
-        System.out.println("Fresher: " + fr);
+//        String query = "select * from dto.FresherEntity";
+//        String className = Helper.getClassNameFromQuery(query);
+//        Class zClass = Helper.getClassObjectWithClassName(className);
+//        HashMap<String, String> mapAttrCol = Helper.getMapAttributeColumn(zClass);
+//        System.out.println(mapAttrCol);
+        HqlQuery q = new HqlQuery("Select max(courseId) as a from dto.CourseEntity");
+
+        q.createSql();
+        List<Map<String, Object>> result = q.excuteQuery();
+        System.out.println(result);
+        System.out.println(q.getTargetQuery());
+
+        //System.out.println(rs);
+
+
+
+
+
     }
 }

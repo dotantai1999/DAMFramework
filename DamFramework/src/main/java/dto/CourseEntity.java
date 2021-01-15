@@ -9,7 +9,7 @@ import java.util.List;
 public class CourseEntity {
     @Id
     @Column(name = "course_id")
-    private Integer cousreId;
+    private Integer courseId;
 
     @Column(name = "course_title")
     private String courseTitle;
@@ -48,7 +48,7 @@ public class CourseEntity {
     @Override
     public String toString() {
         return "CourseEntity{" +
-                "cousreId=" + cousreId +
+                "courseId=" + courseId +
                 ", courseTitle='" + courseTitle + '\'' +
                 ", freshers=" + freshers +
                 '}';
