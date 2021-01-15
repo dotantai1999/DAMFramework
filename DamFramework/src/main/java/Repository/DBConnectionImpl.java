@@ -11,9 +11,11 @@ import java.util.ResourceBundle;
 import java.util.Scanner;
 
 public class DBConnectionImpl {
-	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("db");
+//	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("db");
 
 	private static Connection connection = null;
+
+	public static String fileName;
 
 	private DBConnectionImpl(){}
 
@@ -23,7 +25,7 @@ public class DBConnectionImpl {
 		}
 
 		try {
-			Map<String, String> dbConfig = getDBConfig("db.properties");
+			Map<String, String> dbConfig = getDBConfig();
 
 
 			Class.forName(dbConfig.get("driverName"));
@@ -51,10 +53,10 @@ public class DBConnectionImpl {
 		}
 	}
 
-	public static Map<String, String> getDBConfig(String fileName){
+	public static Map<String, String> getDBConfig(){
 		Map<String, String> result = new HashMap<>();
 
-		File myObj = new File("DamFramework/src/"+fileName);
+		File myObj = new File(fileName);
 		System.out.println(myObj.getAbsolutePath());
 		try {
 			Scanner myReader = new Scanner(myObj);
