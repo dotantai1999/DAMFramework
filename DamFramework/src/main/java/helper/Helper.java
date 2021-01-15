@@ -123,7 +123,7 @@ public class Helper {
     public static List<String> getClassNameFromQuery(String query) {
         List<String> result = new ArrayList<>();
         if (query.toLowerCase().startsWith("select")) {
-            result.add(query.split("(?i)SELECT")[1].split(" ")[0]);
+            result.add(query.split("(?i)from")[1].trim().split(" ")[0]);
         }
 
         if (query.toLowerCase().startsWith("insert")) {

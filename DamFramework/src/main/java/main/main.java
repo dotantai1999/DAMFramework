@@ -54,19 +54,10 @@ public class main {
 //        Class zClass = Helper.getClassObjectWithClassName(className);
 //        HashMap<String, String> mapAttrCol = Helper.getMapAttributeColumn(zClass);
 //        System.out.println(mapAttrCol);
-        HqlQuery q = new HqlQuery("delete from dto.FresherEntity where fdasdf = fsdfdsaf");
-        System.out.println(Helper.getClassNameFromQuery(q.getQuery()).get(0));
+        HqlQuery q = new HqlQuery("select password, count(userId) as dem from dto.UserEntity group by password");
 
-//        q.createSql();
-//        List<Map<String, Object>> result = q.excuteQuery();
-//        System.out.println(result);
-//        System.out.println(q.getTargetQuery());
+        q.createSql();
 
-        //System.out.println(rs);
-
-
-
-
-
+        System.out.println(q.excuteQuery());
     }
 }

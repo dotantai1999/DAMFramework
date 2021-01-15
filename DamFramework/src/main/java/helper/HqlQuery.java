@@ -89,8 +89,8 @@ public class HqlQuery {
                 for(String columnName : listColumnName) {
                     temp = new HashMap<>();
                     temp.put(columnName,rs.getObject(columnName));
+                    result.add(temp);
                 }
-                result.add(temp);
 
             }
         } catch (SQLException throwables) {
@@ -99,5 +99,22 @@ public class HqlQuery {
         return result;
     }
 
+    public int excuteUpdate() {
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        int result = 0;
 
+        conn = DBConnectionImpl.getConnection();
+        try {
+            statement = conn.prepareStatement(this.targetQuery);
+            for(int index : parameter.keySet()) {
+                statement.setObject(index, parameter.get(index));
+            }
+            result = statement.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return result;
+    }
 }
