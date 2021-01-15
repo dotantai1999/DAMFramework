@@ -121,7 +121,7 @@ public class Helper {
 
     // select * from Fresher fresher , Address address join Customer customer where ...
     public static List<String> getClassNameFromQuery(String query) {
-        List<String> result = new ArrayList<>();
+         List<String> result = new ArrayList<>();
         if (query.toLowerCase().startsWith("select")) {
             result.add(query.split("(?i)from")[1].trim().split(" ")[0]);
         }

@@ -1,5 +1,6 @@
 package main;
 
+import Repository.DBConnectionImpl;
 import Repository.ISession;
 import Repository.SessionImpl;
 import dto.*;
@@ -54,10 +55,12 @@ public class main {
 //        Class zClass = Helper.getClassObjectWithClassName(className);
 //        HashMap<String, String> mapAttrCol = Helper.getMapAttributeColumn(zClass);
 //        System.out.println(mapAttrCol);
-        HqlQuery q = new HqlQuery("select password, count(userId) as dem from dto.UserEntity group by password");
+        HqlQuery q = new HqlQuery("select count(userId) as dem from dto.UserEntity");
 
+//        q.setParamter(1, 13);
         q.createSql();
-
+////
         System.out.println(q.excuteQuery());
+//        System.out.println(DBConnectionImpl.getDBConfig("db.properties"));
     }
 }
