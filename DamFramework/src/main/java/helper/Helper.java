@@ -127,17 +127,18 @@ public class Helper {
         }
 
         if (query.toLowerCase().startsWith("insert")) {
-//            result.add(query.split("(?i)INTO")[1].split("[ (]")[0]);
             String first = query.split("(?i)into")[1];
             result.add(first.trim().split("[ (]")[0]);
         }
 
         if (query.toLowerCase().startsWith("update")) {
-            result.add(query.split("")[1].split(" ")[0]);
+            String first = query.split("(?i)update")[1];
+            result.add(first.trim().split("[ ]")[0]);
         }
 
         if (query.toLowerCase().startsWith("delete")) {
-            result.add(query.split("into ")[1].split("[ (]")[0]);
+            String first = query.split("(?i)delete from")[1];
+            result.add(first.trim().split("[ ]")[0]);
         }
         return result;
     }
