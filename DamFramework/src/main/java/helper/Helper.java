@@ -120,10 +120,24 @@ public class Helper {
     }
 
     // select * from Fresher fresher , Address address join Customer customer where ...
-    public static String getClassNameFromQuery(String query) {
-        String result = "";
+    public static List<String> getClassNameFromQuery(String query) {
+        List<String> result = new ArrayList<>();
         if (query.toLowerCase().startsWith("select")) {
-            result = query.split("from ")[1].split(" ")[0];
+            result.add(query.split("(?i)SELECT")[1].split(" ")[0]);
+        }
+
+        if (query.toLowerCase().startsWith("insert")) {
+//            result.add(query.split("(?i)INTO")[1].split("[ (]")[0]);
+            String first = query.split("(?i)into")[1];
+            result.add(first.trim().split("[ (]")[0]);
+        }
+
+        if (query.toLowerCase().startsWith("update")) {
+            result.add(query.split("")[1].split(" ")[0]);
+        }
+
+        if (query.toLowerCase().startsWith("delete")) {
+            result.add(query.split("into ")[1].split("[ (]")[0]);
         }
         return result;
     }

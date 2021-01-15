@@ -54,12 +54,13 @@ public class main {
 //        Class zClass = Helper.getClassObjectWithClassName(className);
 //        HashMap<String, String> mapAttrCol = Helper.getMapAttributeColumn(zClass);
 //        System.out.println(mapAttrCol);
-        HqlQuery q = new HqlQuery("Select max(courseId) as a from dto.CourseEntity");
+        HqlQuery q = new HqlQuery("insert INTO dto.FresherEntity (sfas, adfas) values(dsbgvds,hdghsadf)");
+        System.out.println(Helper.getClassNameFromQuery(q.getQuery()).get(0));
 
-        q.createSql();
-        List<Map<String, Object>> result = q.excuteQuery();
-        System.out.println(result);
-        System.out.println(q.getTargetQuery());
+//        q.createSql();
+//        List<Map<String, Object>> result = q.excuteQuery();
+//        System.out.println(result);
+//        System.out.println(q.getTargetQuery());
 
         //System.out.println(rs);
 

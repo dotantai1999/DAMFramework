@@ -39,7 +39,7 @@ public class HqlQuery {
     }
 
     public void createSql(){
-        String className = Helper.getClassNameFromQuery(this.query);
+        String className = Helper.getClassNameFromQuery(this.query).get(0);
         Class zClass = Helper.getClassObjectWithClassName(className);
         String desQuery = replaceClassName(zClass, className);
         HashMap<String, String> mapAttrCol = Helper.getMapAttributeColumn(zClass);
@@ -98,5 +98,6 @@ public class HqlQuery {
         }
         return result;
     }
+
 
 }
